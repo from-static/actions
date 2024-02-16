@@ -43,7 +43,7 @@ jobs:
       - name: Clone Builder
         uses: actions/checkout@v4
         with:
-          repository: ${{ fromJson(steps.static.outputs.result)._static.builder }}
+          repository: ${{ fromJson(steps.static.outputs.result)._static.generator }}
       # Build the Next.js application and create an artifact for deployment.
       - name: Build
         uses: actions/setup-node@v4
