@@ -24,6 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Configure GitHub Pages
+        id: configure-pages
         uses: actions/configure-pages@v4
         # @todo – We can probably use the preconfigured configuration at somepoint, we will just need to update our
         # changes to the next.config.js file to merge instead of overwrite.
@@ -38,7 +39,14 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            return JSON.parse(fs.readFileSync('./static.json', 'utf8'));
+            const staticConfig = JSON.parse(fs.readFileSync('./static.json', 'utf8'));
+            staticConfig._static.host = {
+              "base_url": "${{ steps.configure-pages.outputs.base_url }}",
+              "origin": "${{ steps.configure-pages.outputs.origin }}",
+              "host": "${{ steps.configure-pages.outputs.host }}",
+              "base_path": "${{ steps.configure-pages.outputs.host }}",
+            };
+            return staticConfig;
       # Clone the builder repository referenced in the static.json file.
       - name: Clone Builder
         uses: actions/checkout@v4
