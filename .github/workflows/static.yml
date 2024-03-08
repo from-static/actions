@@ -44,7 +44,7 @@ jobs:
               "base_url": "${{ steps.configure-pages.outputs.base_url }}",
               "origin": "${{ steps.configure-pages.outputs.origin }}",
               "host": "${{ steps.configure-pages.outputs.host }}",
-              "base_path": "${{ steps.configure-pages.outputs.host }}",
+              "base_path": "${{ steps.configure-pages.outputs.base_path }}",
             };
             return staticConfig;
       # Clone the builder repository referenced in the static.json file.
