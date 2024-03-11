@@ -39,3 +39,22 @@ jobs:
   static:
     uses: from-static/actions/.github/workflows/static.yml@main
 ```
+
+### Workflow Injected Properties
+
+The `static` workflow injects the following properties into the provided `static.json` file during the build process:
+
+
+- Sourced from [`actions/configure-pages@4`](https://github.com/actions/configure-pages/blob/1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d/action.yml#L22)
+  - `_static.base_url`
+    - GitHub Pages site full base URL.
+    - Exampls: `"https://from-static.github.io/static-resume"`, `"https://www.example.com"`
+  - `_static.origin`
+    - GitHub Pages site origin.
+    - Example: `"https://from-static.github.io"`, `"https://www.example.com"`
+  - `_static.host`
+    - GitHub Pages site host.
+    - Example: `"from-static.github.io"`, `"www.example.com"`
+  - `_static.base_path`
+    - GitHub Pages site full base path.
+    - Example: `"/static-resume"`, `""`
