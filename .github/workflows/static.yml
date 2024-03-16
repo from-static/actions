@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "module.exports = { output: 'export', basePath: '/${{ github.event.repository.name }}' }" >  ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/next.config.js
       - run: npx next build ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}
-      - run: cp ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/out ./out
+      - run: cp -r ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/out ./out
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
