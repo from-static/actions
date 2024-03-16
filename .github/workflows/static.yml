@@ -60,7 +60,7 @@ jobs:
       - name: Update Next.js Configuration
         run: |
           echo "module.exports = { output: 'export', basePath: '/${{ github.event.repository.name }}' }" >  ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/next.config.js
-      - run: npx next build ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}
+      - run: cd ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }} && npm run build
       - run: cp -r ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/out ./out
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
