@@ -30,8 +30,7 @@ jobs:
         # changes to the next.config.js file to merge instead of overwrite.
         # with: 
         #   static_site_generator: next
-      # Parses the defined static.json file for use in steps; This will also ensure the user-provided static.json contents
-      # are persited after we clone the builder repository.
+      # Parses the defined static.json file for use in steps and injects "_static" internal configuration.
       - name: Parse static.json
         id: static
         uses: actions/github-script@v7
@@ -40,6 +39,7 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             const staticConfig = JSON.parse(fs.readFileSync('./static.json', 'utf8'));
+            staticConfig._static = staticConfig._static || packageJson._static || {};
             staticConfig._static.host = {
               "base_url": "${{ steps.configure-pages.outputs.base_url }}",
               "origin": "${{ steps.configure-pages.outputs.origin }}",
@@ -47,11 +47,6 @@ jobs:
               "base_path": "${{ steps.configure-pages.outputs.base_path }}",
             };
             return staticConfig;
-      # Clone the builder repository referenced in the static.json file.
-      - name: Clone Builder
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ fromJson(steps.static.outputs.result)._static.generator }}
       # Build the Next.js application and create an artifact for deployment.
       - name: Build
         uses: actions/setup-node@v4
@@ -59,13 +54,14 @@ jobs:
           cache: npm
           node-version: lts/iron
       - run: npm ci
-      # Ensure the static.json file is the user-defined file and not the builder's file.
+      # Ensure the static.json file is the user-defined file and not the generator's file.
       - run: |
-          echo -e '${{steps.static.outputs.result}}' > static.json
+          echo -e '${{steps.static.outputs.result}}' > ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/static.json
       - name: Update Next.js Configuration
         run: |
-          echo "module.exports = { output: 'export', basePath: '/${{ github.event.repository.name }}' }" > next.config.js
-      - run: npm run build
+          echo "module.exports = { output: 'export', basePath: '/${{ github.event.repository.name }}' }" >  ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/next.config.js
+      - run: npx next build ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}
+      - run: cp ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/out ./out
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
