@@ -39,7 +39,7 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             const staticConfig = JSON.parse(fs.readFileSync('./static.json', 'utf8'));
-            staticConfig._static = staticConfig._static || packageJson._static || {};
+            staticConfig._static = staticConfig._static || {};
             staticConfig._static.host = {
               "base_url": "${{ steps.configure-pages.outputs.base_url }}",
               "origin": "${{ steps.configure-pages.outputs.origin }}",
