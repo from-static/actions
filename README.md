@@ -37,7 +37,7 @@ concurrency:
 
 jobs:
   static:
-    uses: from-static/actions/.github/workflows/static.yml@main
+    uses: from-static/actions/.github/workflows/static.yml@v2
 ```
 
 ### Workflow Injected Properties
@@ -58,3 +58,20 @@ The `static` workflow injects the following properties into the provided `static
   - `_static.host.base_path`
     - GitHub Pages site full base path.
     - Example: `"/static-resume"`, `""`
+
+## Dependabot
+
+Since `v2`, the `static` workflow uses `npm` to install generators (and uses the resulting file system to build the site). This means template repositories can now include a `dependabot.yml` file to keep the generator up-to-date after the initial repository creation (clone).
+
+```yaml
+version: 2
+updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+- package-ecosystem: "npm"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+```
