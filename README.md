@@ -46,15 +46,15 @@ The `static` workflow injects the following properties into the provided `static
 
 
 - Sourced from [`actions/configure-pages@4`](https://github.com/actions/configure-pages/blob/1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d/action.yml#L22)
-  - `_static.base_url`
+  - `_static.host.base_url`
     - GitHub Pages site full base URL.
     - Exampls: `"https://from-static.github.io/static-resume"`, `"https://www.example.com"`
-  - `_static.origin`
+  - `_static.host.origin`
     - GitHub Pages site origin.
     - Example: `"https://from-static.github.io"`, `"https://www.example.com"`
-  - `_static.host`
+  - `_static.host.host`
     - GitHub Pages site host.
     - Example: `"from-static.github.io"`, `"www.example.com"`
-  - `_static.base_path`
+  - `_static.host.base_path`
     - GitHub Pages site full base path.
     - Example: `"/static-resume"`, `""`
