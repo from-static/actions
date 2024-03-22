@@ -15,12 +15,13 @@ function parse({ core }, state = {}) {
  }
  // Merge GitHub Action state with the parsed static.json
  config = {
+  ...config,
    _static: {
     host: {
       ...state.host,
     },
     ...config._static,
-   }
+   },
  }
 
  try {
