@@ -111,7 +111,7 @@ jobs:
           echo -e '${{steps.static.outputs.result}}' > ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/static.json
       # Call the ecosystem's default build command.
       - name: "Building from ${{ fromJson(steps.static.outputs.result)._static.generator.name }}"
-        run: cd ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }} && npm run build
+        run: cd ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }} && npm install && npm run build
       - name: Copying Output to Base Directory
         run: cp -r ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/out ./out
       - name: Upload artifact
