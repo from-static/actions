@@ -57,9 +57,7 @@ jobs:
       - name: Replacing static.json in Generator
         run: |
           echo -e '${{steps.static.outputs.result}}' > ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/static.json
-      - name: Update Next.js Configuration
-        run: |
-          echo "module.exports = { output: 'export', basePath: '/${{ github.event.repository.name }}' }" >  ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/next.config.js
+      # Call the ecosystem's default build command
       - name: "Building from ${{ fromJson(steps.static.outputs.result)._static.generator.name }}"
         run: cd ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }} && npm run build
       - name: Copying Output to Base Directory
