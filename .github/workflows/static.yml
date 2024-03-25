@@ -108,9 +108,15 @@ jobs:
       - name: Obtain Generator Version
         run: |
           echo "GENERATOR_VERSION=$(npm show ${{ fromJson(steps.static.outputs.result)._static.generator.name }} --json | jq '.version')" >> $GITHUB_ENV
+      # Obtrains the repository URL from the generator's npm package and converts it to `<owner>/<repo>` format for actions/checkout.
       - name: Obtain Generator Repository
         run: |
-          echo "GENERATOR_REPOSITORY=$(npm show ${{ fromJson(steps.static.outputs.result)._static.generator.name }} --json | jq '.repository.url' | sed 's/git+//')" >> $GITHUB_ENV
+          echo "GENERATOR_REPOSITORY=$(
+            npm show ${{ fromJson(steps.static.outputs.result)._static.generator.name }} --json
+              | jq '.repository.url'
+              | sed 's/git+https:\/\/github.com\///'
+              | sed 's/.git//'
+          )" >> $GITHUB_ENV
       # Clone the generator repository and checkout the version specified in the static.json file.
       - name: Cloning Generator
         uses: actions/checkout@v4
