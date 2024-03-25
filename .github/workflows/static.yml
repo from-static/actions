@@ -105,15 +105,28 @@ jobs:
           node-version: lts/iron
       - name: Install Dependencies
         run: npm ci
+      - name: Obtain Generator Version
+        run: |
+          echo "GENERATOR_VERSION=$(npm show ${{ fromJson(steps.static.outputs.result)._static.generator.name }} --json | jq '.version')" >> $GITHUB_ENV
+      - name: Obtain Generator Repository
+        run: |
+          echo "GENERATOR_REPOSITORY=$(npm show ${{ fromJson(steps.static.outputs.result)._static.generator.name }} --json | jq '.repository.url' | sed 's/git+//')" >> $GITHUB_ENV
+      # Clone the generator repository and checkout the version specified in the static.json file.
+      - name: Cloning Generator
+        uses: actions/checkout@v4
+        with:
+          repository: ${{env.GENERATOR_REPOSITORY}}
+          ref: ${{env.GENERATOR_VERSION}}
+          path: '.static--generator'
       # Ensure the static.json file is the user-defined file and not the generator's file.
       - name: Replacing static.json in Generator
         run: |
-          echo -e '${{steps.static.outputs.result}}' > ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/static.json
-      # Call the ecosystem's default build command.
+          echo -e '${{steps.static.outputs.result}}' > ./.static--generator/static.json
+      # Call the ecosystem's default install and build command.
       - name: "Building from ${{ fromJson(steps.static.outputs.result)._static.generator.name }}"
-        run: cd ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }} && npm install && npm run build
+        run: cd ./.static--generator && npm ci && npm run build
       - name: Copying Output to Base Directory
-        run: cp -r ./node_modules/${{ fromJson(steps.static.outputs.result)._static.generator.name }}/out ./out
+        run: cp -r ./.static--generator/out ./out
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
