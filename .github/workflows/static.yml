@@ -125,9 +125,12 @@ jobs:
           ref: ${{env.GENERATOR_VERSION}}
           path: '.static--generator'
       # Ensure the static.json file is the user-defined file and not the generator's file.
+      # Uses `jq` and an environment variable to avoid issues with unescaped quotes in JSON values.
       - name: Replacing static.json in Generator
+        env:
+          STATIC_JSON: ${{ steps.static.outputs.result }}
         run: |
-          echo -e '${{steps.static.outputs.result}}' > ./.static--generator/static.json
+          jq -r '.' <<<"$STATIC_JSON" > ./.static--generator/static.json
       # Call the ecosystem's default install and build command.
       - name: "Building from ${{ fromJson(steps.static.outputs.result)._static.generator.name }}"
         run: cd ./.static--generator && npm ci && npm run build
