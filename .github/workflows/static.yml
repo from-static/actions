@@ -131,6 +131,12 @@ jobs:
           STATIC_JSON: ${{ steps.static.outputs.result }}
         run: |
           jq -r '.' <<<"$STATIC_JSON" > ./.static--generator/static.json
+      # Sync the user-defined overrides directory to the generator's directory.
+      - name: Syncing Overrides
+        run: |
+          if [ -d "./overrides" ]; then
+            rsync -av ./overrides/ ./.static--generator/
+          fi
       # Call the ecosystem's default install and build command.
       - name: "Building from ${{ fromJson(steps.static.outputs.result)._static.generator.name }}"
         run: cd ./.static--generator && npm ci && npm run build
