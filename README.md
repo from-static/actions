@@ -9,7 +9,7 @@ Reusable GitHub Actions and workflows that can be used to implement [`static`](h
 
 [.github/workflows/static.yml](./.github/workflows/static.yml)
 
-This is the core workflow that can be used to implement a `static` application design pattern. It uses the `static` action to build and deploy a static website to GitHub Pages.
+This is the core workflow that can be used to implement a `static` application design pattern. It uses the `static` action to build and deploy a static site to GitHub Pages.
 
 ### Usage
 
