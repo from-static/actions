@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure GitHub Pages
         id: configure-pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
         # @todo – We can probably use the preconfigured configuration at somepoint, we will just need to update our
         # changes to the next.config.js file to merge instead of overwrite.
         # with: 
