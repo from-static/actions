@@ -143,6 +143,12 @@ jobs:
           STATIC_JSON: ${{ steps.static.outputs.result }}
         run: |
           jq -r '.' <<<"$STATIC_JSON" > ./.static--generator/static.json
+      # Copy the user-defined content directory to the generator's directory.
+      - name: Copy "content" Directory to Generator
+        run: |
+          if [ -d "./content" ]; then
+            rsync -av ./content/ ./.static--generator/content/
+          fi
       # Sync the user-defined overrides directory to the generator's directory.
       - name: Syncing Overrides
         run: |
