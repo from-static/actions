@@ -1,6 +1,21 @@
 name: static
 on:
   workflow_call:
+    inputs:
+      deploy_to_github_pages:
+        description: 'Whether or not to deploy to GitHub Pages. If disabled, the workflow will only build and create an artifact for deployment.'
+        default: true
+        type: boolean
+        required: false
+      generator_repository:
+        description: 'The repository name, with owner, to use as the generator. If not provided, the generator will be inferred from the static.json file.'
+        type: string
+        required: false
+      generator_ref:
+        description: 'The branch, tag, or SHA to checkout. If not provided, the version will be inferred from the ecosystem file and used as the ref.'
+        type: string
+        required: false
+
       
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -11,19 +26,20 @@ permissions:
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: "static-build"
   cancel-in-progress: false
 
 jobs:
   static:
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      name: ${{ inputs.deploy_to_github_pages == true && 'github-pages' || 'static-output' }}
+      url: ${{ inputs.deploy_to_github_pages == true && steps.deployment.outputs.page_url || ''}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Configure GitHub Pages
+        if: ${{ inputs.deploy_to_github_pages == true }}
         id: configure-pages
         uses: actions/configure-pages@v5
       # Parses the defined static.json file for use in steps and injects "_static" internal configuration.
@@ -49,10 +65,10 @@ jobs:
             config = {
               ...config,
               _static: {
-              host: {
+               host: {
                 ...state.host,
-              },
-              ...config._static,
+               },
+               ...config._static,
               },
             }
 
@@ -117,8 +133,8 @@ jobs:
       - name: Cloning Generator
         uses: actions/checkout@v4
         with:
-          repository: ${{env.GENERATOR_REPOSITORY}}
-          ref: ${{env.GENERATOR_VERSION}}
+          repository: ${{inputs.generator_repository || env.GENERATOR_REPOSITORY}}
+          ref: ${{inputs.generator_ref || env.GENERATOR_VERSION}}
           path: '.static--generator'
       # Ensure the static.json file is the user-defined file and not the generator's file.
       # Uses `jq` and an environment variable to avoid issues with unescaped quotes in JSON values.
@@ -143,5 +159,6 @@ jobs:
         with:
           path: ./out
       - name: Deploy to GitHub Pages
+        if: ${{ inputs.deploy_to_github_pages == true }}
         id: deployment
         uses: actions/deploy-pages@v4
