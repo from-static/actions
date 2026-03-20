@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Configure GitHub Pages
         if: ${{ inputs.deploy_to_github_pages == true }}
         id: configure-pages
@@ -45,6 +47,11 @@ jobs:
       - name: Parsing static.json
         id: static
         uses: actions/github-script@v8
+        env:
+          base_url: ${{ steps.configure-pages.outputs.base_url }}
+          origin: ${{ steps.configure-pages.outputs.origin }}
+          host: ${{ steps.configure-pages.outputs.host }}
+          base_path: ${{ steps.configure-pages.outputs.base_path }}
         with:
           script: |
             /**
@@ -102,10 +109,10 @@ jobs:
 
             return utils.parse({ core }, {
               host: {
-                "base_url": "${{ steps.configure-pages.outputs.base_url }}",
-                "origin": "${{ steps.configure-pages.outputs.origin }}",
-                "host": "${{ steps.configure-pages.outputs.host }}",
-                "base_path": "${{ steps.configure-pages.outputs.base_path }}",
+                "base_url": process.env.base_url,
+                "origin": process.env.origin,
+                "host": process.env.host,
+                "base_path": process.env.base_path,
               }
             });
       # Build the application and create an artifact for deployment.
@@ -117,13 +124,17 @@ jobs:
       - name: Install Dependencies
         run: npm ci
       - name: Obtain Generator Version
+        env:
+          GENERATOR_PACKAGE: ${{ fromJson(steps.static.outputs.result)._static.generator.name }}
         run: |
-          echo "GENERATOR_VERSION=$(npm show '${{ fromJson(steps.static.outputs.result)._static.generator.name }}' --json | jq -r '.version')" >> "$GITHUB_ENV"
-      # Obtrains the repository URL from the generator's npm package and converts it to `<owner>/<repo>` format for actions/checkout.
+          echo "GENERATOR_VERSION=$(npm show '$GENERATOR_PACKAGE' --json | jq -r '.version')" >> "$GITHUB_ENV"
+      # Obtains the repository URL from the generator's npm package and converts it to `<owner>/<repo>` format for actions/checkout.
       - name: Obtain Generator Repository
+        env:
+          GENERATOR_PACKAGE: ${{ fromJson(steps.static.outputs.result)._static.generator.name }}
         run: |
           echo "GENERATOR_REPOSITORY=$( \
-            npm show '${{ fromJson(steps.static.outputs.result)._static.generator.name }}' --json \
+            npm show '$GENERATOR_PACKAGE' --json \
               | jq -r '.repository.url' \
               | sed 's/git+https:\/\/github.com\///' \
               | sed 's/.git//' \
@@ -132,6 +143,7 @@ jobs:
       - name: Cloning Generator
         uses: actions/checkout@v6
         with:
+          persist-credentials: false
           repository: ${{inputs.generator_repository || env.GENERATOR_REPOSITORY}}
           ref: ${{inputs.generator_ref || env.GENERATOR_VERSION}}
           path: ".static--generator"

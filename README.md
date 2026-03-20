@@ -2,7 +2,6 @@
 
 Reusable GitHub Actions and workflows that can be used to implement [`static`](https://github.com/from-static) application design patterns.
 
-
 ## Available Workflows
 
 ### `static`
@@ -44,7 +43,6 @@ jobs:
 
 The `static` workflow injects the following properties into the provided `static.json` file during the build process:
 
-
 - Sourced from [`actions/configure-pages@4`](https://github.com/actions/configure-pages/blob/1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d/action.yml#L22)
   - `_static.host.base_url`
     - GitHub Pages site full base URL.
@@ -66,12 +64,12 @@ Since `v2`, the `static` workflow uses `npm` to install generators (and uses the
 ```yaml
 version: 2
 updates:
-- package-ecosystem: "github-actions"
-  directory: "/"
-  schedule:
-    interval: "weekly"
-- package-ecosystem: "npm"
-  directory: "/"
-  schedule:
-    interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
 ```
