@@ -3,20 +3,19 @@ on:
   workflow_call:
     inputs:
       deploy_to_github_pages:
-        description: 'Whether or not to deploy to GitHub Pages. If disabled, the workflow will only build and create an artifact for deployment.'
+        description: "Whether or not to deploy to GitHub Pages. If disabled, the workflow will only build and create an artifact for deployment."
         default: true
         type: boolean
         required: false
       generator_repository:
-        description: 'The repository name, with owner, to use as the generator. If not provided, the generator will be inferred from the static.json file.'
+        description: "The repository name, with owner, to use as the generator. If not provided, the generator will be inferred from the static.json file."
         type: string
         required: false
       generator_ref:
-        description: 'The branch, tag, or SHA to checkout. If not provided, the version will be inferred from the ecosystem file and used as the ref.'
+        description: "The branch, tag, or SHA to checkout. If not provided, the version will be inferred from the ecosystem file and used as the ref."
         type: string
         required: false
 
-      
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
@@ -37,7 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Configure GitHub Pages
         if: ${{ inputs.deploy_to_github_pages == true }}
         id: configure-pages
@@ -45,7 +46,12 @@ jobs:
       # Parses the defined static.json file for use in steps and injects "_static" internal configuration.
       - name: Parsing static.json
         id: static
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
+        env:
+          base_url: ${{ steps.configure-pages.outputs.base_url }}
+          origin: ${{ steps.configure-pages.outputs.origin }}
+          host: ${{ steps.configure-pages.outputs.host }}
+          base_path: ${{ steps.configure-pages.outputs.base_path }}
         with:
           script: |
             /**
@@ -103,39 +109,44 @@ jobs:
 
             return utils.parse({ core }, {
               host: {
-                "base_url": "${{ steps.configure-pages.outputs.base_url }}",
-                "origin": "${{ steps.configure-pages.outputs.origin }}",
-                "host": "${{ steps.configure-pages.outputs.host }}",
-                "base_path": "${{ steps.configure-pages.outputs.base_path }}",
+                "base_url": process.env.base_url,
+                "origin": process.env.origin,
+                "host": process.env.host,
+                "base_path": process.env.base_path,
               }
             });
       # Build the application and create an artifact for deployment.
       - name: Configure Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           cache: npm
-          node-version: lts/iron
+          node-version: lts/krypton
       - name: Install Dependencies
         run: npm ci
       - name: Obtain Generator Version
+        env:
+          GENERATOR_PACKAGE: ${{ fromJson(steps.static.outputs.result)._static.generator.name }}
         run: |
-          echo "GENERATOR_VERSION=$(npm show '${{ fromJson(steps.static.outputs.result)._static.generator.name }}' --json | jq -r '.version')" >> "$GITHUB_ENV"
-      # Obtrains the repository URL from the generator's npm package and converts it to `<owner>/<repo>` format for actions/checkout.
+          echo "GENERATOR_VERSION=$(npm show $GENERATOR_PACKAGE --json | jq -r '.version')" >> "$GITHUB_ENV"
+      # Obtains the repository URL from the generator's npm package and converts it to `<owner>/<repo>` format for actions/checkout.
       - name: Obtain Generator Repository
+        env:
+          GENERATOR_PACKAGE: ${{ fromJson(steps.static.outputs.result)._static.generator.name }}
         run: |
           echo "GENERATOR_REPOSITORY=$( \
-            npm show '${{ fromJson(steps.static.outputs.result)._static.generator.name }}' --json \
+            npm show $GENERATOR_PACKAGE --json \
               | jq -r '.repository.url' \
               | sed 's/git+https:\/\/github.com\///' \
               | sed 's/.git//' \
           )" >> "$GITHUB_ENV"
       # Clone the generator repository and checkout the version specified in the static.json file.
       - name: Cloning Generator
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
+          persist-credentials: false
           repository: ${{inputs.generator_repository || env.GENERATOR_REPOSITORY}}
           ref: ${{inputs.generator_ref || env.GENERATOR_VERSION}}
-          path: '.static--generator'
+          path: ".static--generator"
       # Ensure the static.json file is the user-defined file and not the generator's file.
       # Uses `jq` and an environment variable to avoid issues with unescaped quotes in JSON values.
       - name: Replacing static.json in Generator
@@ -161,7 +172,7 @@ jobs:
       - name: Copying Output to Base Directory
         run: cp -r ./.static--generator/out ./out
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./out
       - name: Deploy to GitHub Pages
