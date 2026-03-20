@@ -127,14 +127,14 @@ jobs:
         env:
           GENERATOR_PACKAGE: ${{ fromJson(steps.static.outputs.result)._static.generator.name }}
         run: |
-          echo "GENERATOR_VERSION=$(npm show '$GENERATOR_PACKAGE' --json | jq -r '.version')" >> "$GITHUB_ENV"
+          echo "GENERATOR_VERSION=$(npm show $GENERATOR_PACKAGE --json | jq -r '.version')" >> "$GITHUB_ENV"
       # Obtains the repository URL from the generator's npm package and converts it to `<owner>/<repo>` format for actions/checkout.
       - name: Obtain Generator Repository
         env:
           GENERATOR_PACKAGE: ${{ fromJson(steps.static.outputs.result)._static.generator.name }}
         run: |
           echo "GENERATOR_REPOSITORY=$( \
-            npm show '$GENERATOR_PACKAGE' --json \
+            npm show $GENERATOR_PACKAGE --json \
               | jq -r '.repository.url' \
               | sed 's/git+https:\/\/github.com\///' \
               | sed 's/.git//' \
