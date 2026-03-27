@@ -7,6 +7,11 @@ on:
         default: true
         type: boolean
         required: false
+      upload_artifact:
+        description: "Whether or not to upload the built static site as an artifact. This is required to deploy to GitHub Pages, but can be used independently if you want to use the built static site for another purpose (e.g. deploying to a different hosting provider)."
+        default: true
+        type: boolean
+        required: false
       generator_repository:
         description: "The repository name, with owner, to use as the generator. If not provided, the generator will be inferred from the static.json file."
         type: string
@@ -36,8 +41,8 @@ concurrency:
 jobs:
   static:
     environment:
-      name: ${{ inputs.deploy_to_github_pages == true && 'github-pages' || 'static-output' }}
-      url: ${{ inputs.deploy_to_github_pages == true && steps.deployment.outputs.page_url || ''}}
+      name: ${{ inputs.deploy_to_github_pages == 'true' && 'github-pages' || 'static-output' }}
+      url: ${{ inputs.deploy_to_github_pages == 'true' && steps.deployment.outputs.page_url || ''}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,7 +50,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Configure GitHub Pages
-        if: ${{ inputs.deploy_to_github_pages == true }}
+        if: ${{ inputs.deploy_to_github_pages == 'true' }}
         id: configure-pages
         uses: actions/configure-pages@v5
       # Parses the defined static.json file for use in steps and injects "_static" internal configuration.
@@ -178,10 +183,11 @@ jobs:
       - name: Copying Output to Base Directory
         run: cp -r ./.static--generator/out ./out
       - name: Upload artifact
+        if: ${{ inputs.upload_artifact == 'true' }}
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./out
       - name: Deploy to GitHub Pages
-        if: ${{ inputs.deploy_to_github_pages == true }}
+        if: ${{ inputs.deploy_to_github_pages == 'true' }}
         id: deployment
         uses: actions/deploy-pages@v4
