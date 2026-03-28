@@ -190,4 +190,4 @@ jobs:
       - name: Deploy to GitHub Pages
         if: ${{ inputs.deploy_to_github_pages == 'true' }}
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
