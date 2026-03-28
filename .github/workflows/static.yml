@@ -52,7 +52,7 @@ jobs:
       - name: Configure GitHub Pages
         if: ${{ inputs.deploy_to_github_pages == 'true' }}
         id: configure-pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       # Parses the defined static.json file for use in steps and injects "_static" internal configuration.
       - name: Parsing static.json
         id: static
