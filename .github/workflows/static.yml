@@ -177,9 +177,16 @@ jobs:
           if [ -d "./overrides" ]; then
             rsync -av ./overrides/ ./.static--generator/
           fi
-      # Call the ecosystem's default install and build command.
+      # [ECOSYSTEM SPECIFIC STEPS]
+      #
+      # At the moment, this action only supports `npm` as the ecosystem, but the steps below
+      # can be modified to support other ecosystems.
+      #
+      - name: Merge the package.json, removing the targeted generator from the dependencies.
+        run: |
+          jq -s '.[0] * .[1] | del(.dependencies["${{ fromJson(steps.static.outputs.result)._static.generator.name }}"])' ./.static--generator/package.json package.json > ./merged--package.json && mv ./merged--package.json ./.static--generator/package.json
       - name: "Building from ${{ fromJson(steps.static.outputs.result)._static.generator.name }}"
-        run: cd ./.static--generator && npm ci && npm run build
+        run: cd ./.static--generator && npm install && npm run build
       - name: Copying Output to Base Directory
         run: cp -r ./.static--generator/out ./out
       - name: Upload artifact
