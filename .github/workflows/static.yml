@@ -56,7 +56,7 @@ jobs:
       # Parses the defined static.json file for use in steps and injects "_static" internal configuration.
       - name: Parsing static.json
         id: static
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           base_url: ${{ steps.configure-pages.outputs.base_url }}
           origin: ${{ steps.configure-pages.outputs.origin }}
