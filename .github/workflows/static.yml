@@ -184,7 +184,7 @@ jobs:
         run: cp -r ./.static--generator/out ./out
       - name: Upload artifact
         if: ${{ inputs.upload_artifact == 'true' }}
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./out
       - name: Deploy to GitHub Pages
