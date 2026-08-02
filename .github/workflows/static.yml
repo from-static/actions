@@ -46,17 +46,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       - name: Configure GitHub Pages
         if: ${{ inputs.deploy_to_github_pages == 'true' }}
         id: configure-pages
-        uses: actions/configure-pages@v6
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       # Parses the defined static.json file for use in steps and injects "_static" internal configuration.
       - name: Parsing static.json
         id: static
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         env:
           base_url: ${{ steps.configure-pages.outputs.base_url }}
           origin: ${{ steps.configure-pages.outputs.origin }}
@@ -128,7 +128,7 @@ jobs:
             });
       # Build the application and create an artifact for deployment.
       - name: Configure Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           cache: npm
           node-version: lts/krypton
@@ -152,7 +152,7 @@ jobs:
           )" >> "$GITHUB_ENV"
       # Clone the generator repository and checkout the version specified in the static.json file.
       - name: Cloning Generator
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           repository: ${{inputs.generator_repository || env.GENERATOR_REPOSITORY}}
@@ -184,10 +184,10 @@ jobs:
         run: cp -r ./.static--generator/out ./out
       - name: Upload artifact
         if: ${{ inputs.upload_artifact == 'true' }}
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: ./out
       - name: Deploy to GitHub Pages
         if: ${{ inputs.deploy_to_github_pages == 'true' }}
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5
