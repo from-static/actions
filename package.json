@@ -3,6 +3,6 @@
     "lint": "npx @biomejs/biome lint && actionlint && zizmor ./.github"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.6"
+    "@biomejs/biome": "2.5.7"
   }
 }
